@@ -37,7 +37,7 @@ function getFileSystem(){
 /* show the content of a directory */
 function listDir(directoryEntry){
 	if( !directoryEntry.isDirectory ) console.log('listDir incorrect type');
-	$.mobile.showPageLoadingMsg(); // show loading message
+	//$.mobile.showPageLoadingMsg(); // show loading message
 	
 	currentDir = directoryEntry; // set current directory
 	directoryEntry.getParent(function(par){ // success get parent
@@ -72,7 +72,7 @@ function listDir(directoryEntry){
 			else if( entry.isFile )
 				dirContent.append('<div class="ui-block-'+blockLetter+'"><div class="file"><p>'+entry.name+'</p></div></div>');
 		}
-		$.mobile.hidePageLoadingMsg(); // hide loading message
+		//$.mobile.hidePageLoadingMsg(); // hide loading message
 	}, function(error){
 		console.log('listDir readEntries error: '+error.code);
 	});
@@ -81,7 +81,7 @@ function listDir(directoryEntry){
 /* read from file */
 function readFile(fileEntry){
 	if( !fileEntry.isFile ) console.log('readFile incorrect type');
-	$.mobile.showPageLoadingMsg(); // show loading message
+	//$.mobile.showPageLoadingMsg(); // show loading message
 	
 	fileEntry.file(function(file){
 		var reader = new FileReader();
@@ -91,7 +91,7 @@ function readFile(fileEntry){
         };
         reader.readAsDataURL(file);
         
-        $.mobile.hidePageLoadingMsg(); // hide loading message
+        //$.mobile.hidePageLoadingMsg(); // hide loading message
         
         // dialog with file details
         $('#file_details').html('<p><strong>Name:</strong> '+file.name+
@@ -163,16 +163,17 @@ function clickItemAction(){
 	folders.live('click', function(){
 		var name = $(this).text();
 		getActiveItem(name, 'd');
-		$('#menu').trigger('click'); // menu dialog box
+		openItem(activeItemType);
 	});
 	
 	files.live('click', function(){
-		var name = $(this).text();
+		alert('This will open');
+		/*var name = $(this).text();
 		getActiveItem(name, 'f');
 		$('#menu').trigger('click'); // menu dialog box
 		// paste button always disabled for files
 		pasteBtn.button('disable');
-		pasteBtn.button('refresh');
+		pasteBtn.button('refresh');*/
 	});
 	
 	backBtn.click(function(){ // go one level up
