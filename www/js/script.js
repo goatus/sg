@@ -167,13 +167,9 @@ function clickItemAction(){
 	});
 	
 	files.live('click', function(){
-		alert('This will open');
-		/*var name = $(this).text();
+		var name = $(this).text();
 		getActiveItem(name, 'f');
-		$('#menu').trigger('click'); // menu dialog box
-		// paste button always disabled for files
-		pasteBtn.button('disable');
-		pasteBtn.button('refresh');*/
+		alert(activeItem.fullPath);
 	});
 	
 	backBtn.click(function(){ // go one level up
