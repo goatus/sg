@@ -170,6 +170,16 @@ function clickItemAction(){
 		var name = $(this).text();
 		getActiveItem(name, 'f');
 		alert(activeItem.fullPath);
+		 var xhr = new XMLHttpRequest();
+		xhr.open('GET', activeItem.fullPath);
+		xhr.responseType = 'arraybuffer';// Force response type to binary.
+		xhr.onload = function() {
+			alert(xhr.response)
+		};
+		xhr.onabort = xhr.onerror = xhr.ontimeout = function() {
+			alert('Failed to request');
+		};
+		xhr.send(null);// Fire request.
 	});
 	
 	backBtn.click(function(){ // go one level up
