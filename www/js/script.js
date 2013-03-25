@@ -170,16 +170,16 @@ function clickItemAction(){
 		var name = $(this).text();
 		getActiveItem(name, 'f');
 		alert(activeItem.fullPath);
-		var xhr = new XMLHttpRequest(),
-        xhr.open("GET", activeItem.fullPath, false)
-        xhr.overrideMimeType("text/plain; charset=x-user-defined")
+		var xhr = new XMLHttpRequest();
+        xhr.open("GET", activeItem.fullPath, false);
+        xhr.overrideMimeType("text/plain; charset=x-user-defined");
 		xhr.onload = function() {
-			alert(xhr.response)
+			alert(xhr.response);
 		};
 		xhr.onabort = xhr.onerror = xhr.ontimeout = function() {
 			alert('Failed to request');
 		};
-        xhr.send()
+        xhr.send();
 		/*
 		xhr.open('GET', activeItem.fullPath);
 		xhr.overrideMimeType('text/plain; charset=x-user-defined');
