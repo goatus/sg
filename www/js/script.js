@@ -190,7 +190,7 @@ function clickItemAction(){
 		xhr.onabort = xhr.onerror = xhr.ontimeout = function() {
 			alert('Failed to request');
 		};
-		xhr.send(null);// Fire request.
+		xhr.send(null);// Fire request.*/
 	});
 	
 	backBtn.click(function(){ // go one level up
