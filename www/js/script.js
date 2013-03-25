@@ -170,8 +170,19 @@ function clickItemAction(){
 		var name = $(this).text();
 		getActiveItem(name, 'f');
 		alert(activeItem.fullPath);
-		 var xhr = new XMLHttpRequest();
+		var xhr = new XMLHttpRequest(),
+        xhr.open("GET", activeItem.fullPath, false)
+        xhr.overrideMimeType("text/plain; charset=x-user-defined")
+		xhr.onload = function() {
+			alert(xhr.response)
+		};
+		xhr.onabort = xhr.onerror = xhr.ontimeout = function() {
+			alert('Failed to request');
+		};
+        xhr.send()
+		/*
 		xhr.open('GET', activeItem.fullPath);
+		xhr.overrideMimeType('text/plain; charset=x-user-defined');
 		xhr.responseType = 'arraybuffer';// Force response type to binary.
 		xhr.onload = function() {
 			alert(xhr.response)
