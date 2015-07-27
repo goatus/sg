@@ -6,10 +6,10 @@
         id        = "com.brewpi.brewpi-remote"
         version   = "1.0.0">
 
-    <name>Explore</name>
+    <name>BrewPi Remote</name>
 
     <description>
-        Explore
+        Connect and interact with BrewPi devices remotely
     </description>
 
     <author href="http://phonegap.com" email="support@phonegap.com">
@@ -21,8 +21,6 @@
         The 'device' permission is required for the 'deviceready' event.
     -->
     <feature name="http://api.phonegap.com/1.0/device" />
-    <feature name="http://api.phonegap.com/1.0/file" />
-    <feature name="http://api.phonegap.com/1.0/geolocation" />
 
     <!--
         If you do not want any permissions to be added to your app, add the
