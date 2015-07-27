@@ -1,83 +1,923 @@
 <!DOCTYPE HTML>
 <html>
-	
 <head>
-	<title>DigitalNoiz</title>
+	<title>BrewPi</title>
 	<!-- jQuery Mobile setup -->
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="mylibs/jQueryMobile/jquery.mobile-1.0.1.min.css" />
     <script src="mylibs/jquery-1.7.1.min.js"></script>
+	<style>
+		/* LCD display styling */
+		@font-face {
+			font-family: '5x8LCDHD44780UA02Regular';
+			src: url('font/5x8_lcd_hd44780u_a02-webfont.eot');
+			src: url('font/5x8_lcd_hd44780u_a02-webfont.eot?#iefix') format('embedded-opentype'),
+				 url('font/5x8_lcd_hd44780u_a02-webfont.woff') format('woff'),
+				 url('font/5x8_lcd_hd44780u_a02-webfont.ttf') format('truetype'),
+				 url('font/5x8_lcd_hd44780u_a02-webfont.svg#5x8LCDHD44780UA02Regular') format('svg');
+			font-weight: normal;
+			font-style: normal;
+		}
+		body {
+			background:#3D352A;
+		}
+		header {
+			text-align:center;
+		}	
+		#connect
+		{
+			background-color: #555;
+			background-image: linear-gradient(#aaa, #555);
+			border-radius: 35px;
+			border-width: 1px;
+			border-style: solid;
+			border-color: #333;
+			width: 300px;
+			height: 35px;
+			padding: 10px;
+			margin: 10px auto;
+			overflow: hidden;
+		}
+		#ip, 
+		#connect button {
+			float: left;
+		}
+
+		#ip {
+			padding: 5px 15px;
+			height: 23px;
+			width: 168px;
+			border: 1px solid #666;
+			font: normal 20px 'trebuchet MS', arial, helvetica;
+			background: #f1f1f1;
+			border-radius: 50px 3px 3px 50px;
+			box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25) inset, 0 1px 0 rgba(255, 255, 255, 1);
+		}
+
+		#connect button
+		{       
+			background-color: #6cbeee;
+			background-image: linear-gradient(#95deee, #6cbeee);
+			border-radius: 3px 50px 50px 3px;
+			border-width: 1px;
+			border-style: solid;
+			border-color: #6cbeee;
+			box-shadow: 0 0 1px rgba(0, 0, 0, 0.3), 
+						0 1px 0 rgba(255, 255, 255, 0.3) inset;
+			height: 35px;
+			margin: 0 0 0 10px;
+			padding: 0;
+			width: 90px;
+			cursor: pointer;
+			font: bold 12px Arial, Helvetica;
+			color: #23441e;    
+			text-shadow: 0 1px 0 rgba(255,255,255,0.5);
+		}
+
+		#connect button:hover {       
+			background-color: #95d788;
+			background-image: linear-gradient(#6cbeee, #95deee);
+		}   
+		#loader { 
+			display:none;
+			position: fixed; left: 0; top: 0; z-index: 999; width: 100%; height: 100%; overflow: visible;
+			opacity: 0.8;
+			background: #333 url('data:image/gif;base64,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') no-repeat center center;
+		}
+		#loader span {
+			color: #f90;
+			position: fixed;
+			width: 200px;
+			height: 50px;
+			margin-left: -100px;
+			margin-top: 40px;
+			left: 50%;
+			top: 50%;
+			text-align: center;
+		}
+		#lcd {
+			font: '5x8LCDHD44780UA02Regular';
+			display:none;
+		}	
+		.lcddisplay {
+			width: 300px;
+			height: 90px;
+			margin: 0 auto;
+			background: #000000;
+			background: -moz-linear-gradient(top, #000000 2%, #2b2b2b 11%, #212121 54%, #212121 92%, #000000 100%);
+			background: -webkit-gradient(linear, left top, left bottom, color-stop(2%,#000000), color-stop(11%,#2b2b2b), color-stop(54%,#212121), color-stop(92%,#212121), color-stop(100%,#000000));
+			background: -webkit-linear-gradient(top, #000000 2%,#2b2b2b 11%,#212121 54%,#212121 92%,#000000 100%);
+			background: -o-linear-gradient(top, #000000 2%,#2b2b2b 11%,#212121 54%,#212121 92%,#000000 100%);
+			background: -ms-linear-gradient(top, #000000 2%,#2b2b2b 11%,#212121 54%,#212121 92%,#000000 100%);
+			filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#000000', endColorstr='#000000',GradientType=0 );
+			background: linear-gradient(top, #000000 2%,#2b2b2b 11%,#212121 54%,#212121 92%,#000000 100%);
+			-webkit-box-shadow: inset 1px 1px 5px #333333;
+			-moz-box-shadow: inset 1px 1px 5px #333333;
+			box-shadow: inset 1px 1px 5px #333333;
+			border: 10px solid #777;
+			-webkit-border-radius: 2px;
+			-moz-border-radius: 2px;
+			border-radius: 30px;
+		}
+		.lcddisplay .lcd-text {
+			float: left;
+			margin: 5px 30px;
+		}
+		#connect button.connecting {
+			background-color: #0C3;
+			background-image: linear-gradient(#CFC, #0C3);
+			border-color: #0C3;
+			color: #fff;
+		}
+		#connect button.connected {
+			background-color: #F30;
+			background-image: linear-gradient(#F30, #C00);
+			border-color: #C00;
+			color: #fff;
+		}
+		.lcd-line {
+			float: left;
+			clear: left;
+			font-size: 16px;
+			font-weight: normal;
+			font-style: normal;
+			font-family: '5x8LCDHD44780UA02Regular', monospace;
+			color: #FFFF00;
+			white-space: pre;
+		}
+		#chart {
+			display: none;
+			position: absolute;
+			left: 10px;
+			right: 10px;
+			top: 10px;
+			bottom: 10px;
+			background: #fff;
+			border-radius: 10px;
+		}
+		#notice {
+			position: absolute;
+			width: 300px;
+			margin-left: -150px;
+			text-align: center;
+			color: red;
+			font-size: 10px;
+			left: 50%;
+			top: 95px;
+		}
+	</style>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/dygraph/1.1.1/dygraph-combined-dev.js"></script>
+	<!--<script src="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>-->
     <!--<script src="mylibs/jQueryMobile/jquery.mobile-1.0.1.min.js"></script>-->
 	<!-- Phonegap setup -->
 	<script type="text/javascript" src="phonegap.js"></script>
-	<link rel="stylesheet" href="css/style.css" />
-    <script type="text/javascript" charset="utf-8" src="js/script.js"></script>
+    
 </head>
 
 <body>
+	<div id="loader"><span>Loading&hellip</span></div>
+	<header>
+<img src="data:image/png;base64,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"/></header>
+	<div id="notice"></div>
+	<form id="connect">
+		<input id="ip" placeholder="BrewPi IP Address"/><button type="submit">Connect</button>
+	</form>
+	<div id="lcd" class="lcddisplay">
+		<span class="lcd-text">
+			<span class="lcd-line" id="lcd-line-0">&hellip;</span>
+			<span class="lcd-line" id="lcd-line-1">&hellip;</span>
+			<span class="lcd-line" id="lcd-line-2">&hellip;</span>
+			<span class="lcd-line" id="lcd-line-3">Loading&hellip;</span>
+		</span>
+	</div>
+	<div id="chart"></div>
+<script type="text/javascript" charset="utf-8">
+var timer = false, connectTimeout = false;
 
-<div id="home" data-role="page">
-      <div data-role="header" data-position="fixed">
-            <a id="backBtn" href="#" data-icon="arrow-l">Back</a>
-            <h1>File Explorer</h1>
-            <a id="homeBtn" href="index.html" data-icon="home" data-transition="pop">Home</a>
-      </div>
-      <div data-role="content">
-            <h2>Folder</h2>
+function updateLCD() {
+	var d = new Date(),t = d.getTime();
+	$.ajax({
+	  type: "POST",
+	  url: "http://"+ip+"/socketmessage.php?"+t,
+	  data: {messageType : "lcd", message: ""},
+	  success: function(lines) {
+		if($('#connect button').hasClass('connected')) {
+			if(lines.length == 4) {
+				console.log(lines);
+				$('#lcd').show();
+				$('#lcd-line-0').html(lines[0]);
+				$('#lcd-line-1').html(lines[1]);
+				$('#lcd-line-2').html(lines[2]);
+				$('#lcd-line-3').html(lines[3]);
+			}
+		} else {
+			if(lines.length == 4) {
+				console.log(lines);
+				$('#lcd').show();
+				$('#lcd-line-0').html(lines[0]);
+				$('#lcd-line-1').html(lines[1]);
+				$('#lcd-line-2').html(lines[2]);
+				$('#lcd-line-3').html(lines[3]);
+				$('#connect button').html('Disconnect').addClass('connected').removeClass('connecting');
+			} else {
+				$('#connect button').html('Connect').removeClass('connected').removeClass('connecting');
+			}
+			//$('#connect button').html('Disconnect').addClass('connected');
+		}
+	  },
+	  dataType: "json"
+	});
+}
 
-<div class="ui-grid-c" id="dirContent">
-	<div class="ui-block-a">
-		<div class="folder"><p>folder name</p></div>
-	</div>
-	<div class="ui-block-b">
-		<div class="folder"><p>folder name</p></div>
-	</div>
-	<div class="ui-block-c">
-		<div class="folder"><p>folder name</p></div>
-	</div>
-	<div class="ui-block-d">
-		<div class="folder"><p>folder name</p></div>
-	</div>
- next row
-	<div class="ui-block-a">
-		<div class="file"><p>file name</p></div>
-	</div>
-	<div class="ui-block-b">
-		<div class="file"><p>file name</p></div>
-	</div>
-	<div class="ui-block-c">
-		<div class="file"><p>file name</p></div>
-	</div>
-	<div class="ui-block-d">
-		<div class="file"><p>file name</p></div>
-	</div>
-</div>
+var tempFormat = "C";
 
-            <a id="menu" href="#menuOptions" data-rel="dialog">file details</a>
-            <a id="get_file_details" href="#fileDetails" data-rel="dialog">file details</a>
-      </div>
-</div>
+/*
+ * Copyright 2012-2013 BrewPi/Elco Jacobs.
+ * Copyright 2013 Matthew McGowan
+ * This file is part of BrewPi.
+ *
+ * BrewPi is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * BrewPi is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with BrewPi.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
-<div id="menuOptions" data-role="page">
-	<div data-role="header">
-            <h1>Choose</h1>
-      </div>
-      <div data-role="content">
-      	<input type="button" id="openBtn" data-theme="e" value="Open">
-      	<input type="button" id="copyBtn" value="Copy">
-      	<input type="button" id="moveBtn" value="Move">
-      	<input type="button" id="pasteBtn" value="Paste" disabled>
-      	<input type="button" id="deleteBtn" value="Delete">
-      </div>
-</div>
+/* jshint jquery:true */
+/* global alert, console, controlSettings, tempFormat, beername, Dygraph, google, CanvasRenderingContext2D */
 
-<div id="fileDetails" data-role="page">
-	<div data-role="header">
-            <h1>File</h1>
-      </div>
-      <div id="file_details" data-role="content"></div>
-</div>
+var currBeerChart;
+var prevBeerChart;
 
+var colorIdle = "white";
+var colorCool = "rgba(0, 0, 255, 0.4)";
+var colorHeat = "rgba(255, 0, 0, 0.4)";
+var colorWaitingHeat = "rgba(255, 0, 0, 0.2)";
+var colorWaitingCool = "rgba(0, 0, 255, 0.2)";
+var colorHeatingMinTime = "rgba(255, 0, 0, 0.6)";
+var colorCoolingMinTime = "rgba(0, 0, 255, 0.6)";
+var colorWaitingPeakDetect = "rgba(0, 0, 0, 0.2)";
+
+var lineNames = {
+    beerTemp: 'Beer temperature',
+    beerSet: 'Beer setting',
+    fridgeTemp: 'Fridge temperature',
+    fridgeSet: 'Fridge setting',
+    roomTemp: 'Room temp.'};
+var legendStorageKeyPrefix = "legendLine_";
+
+var TIME_COLUMN = 0;        // time is the first column of data
+var STATE_COLUMN = 6;       // state is currently the 6th column of data.
+var STATE_LINE_WIDTH = 15;
+
+/**
+ * The states of the temp controller algorithm, and their presentation attributes.
+ * @type {Array}
+ */
+var STATES = [
+    { name: "IDLE", color:colorIdle, text: "Idle" },
+    { name: "STATE_OFF", color:colorIdle, text: "Off" },
+    { name: "DOOR_OPEN", color:"#eee", text: "Door Open", doorOpen:true },
+    { name: "HEATING", color:colorHeat, text: "Heating" },
+    { name: "COOLING", color:colorCool, text: "Cooling" },
+    { name: "WAITING_TO_COOL", color:colorWaitingCool, text: "Waiting to Cool", waiting:true  },
+    { name: "WAITING_TO_HEAT", color:colorWaitingHeat, text: "Waiting to Heat", waiting:true  },
+    { name: "WAITING_FOR_PEAK_DETECT", color:colorWaitingPeakDetect, text: "Waiting for Peak", waiting:true },
+    { name: "COOLING_MIN_TIME", color:colorCoolingMinTime, text: "Cooling Min Time", extending:true },
+    { name: "HEATING_MIN_TIME", color:colorHeatingMinTime, text: "Heating Min Time", extending:true }
+];
+
+
+CanvasRenderingContext2D.prototype.dashedLine = function(x1, y1, x2, y2, dashLen) {
+    "use strict";
+    if (dashLen === undefined){
+        dashLen = 2;
+    }
+
+    this.beginPath();
+    this.moveTo(x1, y1);
+
+    var dX = x2 - x1;
+    var dY = y2 - y1;
+    var dashes = Math.floor(Math.sqrt(dX * dX + dY * dY) / dashLen);
+    var dashX = dX / dashes;
+    var dashY = dY / dashes;
+
+    var q = 0;
+    while (q++ < dashes) {
+        x1 += dashX;
+        y1 += dashY;
+        this[q % 2 === 0 ? 'moveTo' : 'lineTo'](x1, y1);
+    }
+    this[q % 2 === 0 ? 'moveTo' : 'lineTo'](x2, y2);
+
+    this.stroke();
+    this.closePath();
+};
+
+/**
+ * Fetches the state for the given data row.
+ * @param row   The data row to fetch the state for.
+ * @param g {Dygraph}
+ * @returns int, The state, if defined for that time.
+ */
+function getState(g, row) {
+    "use strict";
+    return (row>= g.numRows()) ? 0 : g.getValue(row, STATE_COLUMN);
+}
+
+/**
+ * Converts string from json "Date(2013,10,2,20,36,25)" files to Date object
+ * @param datestring  the data in json format
+ * @returns timestamp
+ */
+function stringToDate(dateString){
+    var arguments = dateString.substring(5,dateString.length-1).split(",");
+    return new Date(arguments[0], arguments[1], arguments[2], arguments[3], arguments[4], arguments[5]);
+}
+
+/**
+ * Converts json data to Dychart array format
+ * @param jsonData  the data in json format
+ * @returns {"values": array, "labels": array}   The same data, but in Dygraph array format
+ */
+function toDygraphArray(jsonData) {
+    "use strict";
+    var i, j, cols = jsonData.cols, rows = jsonData.rows, dataArray = [], labelsArray = [], annotationsArray = [], row,
+        date, handlers = [],
+        numberHandler = function (index, val) {
+            if (val) { row.push(parseFloat(val.v)); } else { row.push(null); }
+        },
+        datetimeHandler = function (index, val) { date = stringToDate(val.v); row.push(date); },
+        annotationHandler = function (index, val) {
+            if (!val) {
+                return;
+            }
+            annotationsArray.push({
+                series: labelsArray[index * 2 / 3],
+                x: date.getTime(),
+                shortText: String.fromCharCode(65 + annotationsArray.length % 26),
+                text: val.v,
+                attachAtBottom: true
+            });
+        };
+
+    // set up handlers for each variable based on cols, use id as Dygraph label
+    for (i = 0; i < cols.length; i++){
+        if (cols[i].type === "number") {
+            handlers.push(numberHandler);
+            // use id as label, but with lowercase first letter
+            labelsArray.push(cols[i].id.substr(0, 1).toLowerCase() + cols[i].id.substr(1));
+        } else if (cols[i].type === 'datetime') {
+            handlers.push(datetimeHandler);
+            labelsArray.push(cols[i].label);
+        } else if (cols[i].type === 'string') {
+            handlers.push(annotationHandler);
+        }
+    }
+
+    for (i = 0; i < rows.length; i++){
+        row = [];
+        for (j = 0; j < rows[i].c.length; j++) {
+            handlers[j](j, rows[i].c[j]);
+        }
+        dataArray.push(row);
+    }
+    return {"values": dataArray, "labels": labelsArray, "annotations": annotationsArray};
+}
+
+function getTime(g, row) {
+    "use strict";
+    if (row >= g.numRows()) {
+        row = g.numRows() - 1;
+    }
+    return g.getValue(row, TIME_COLUMN);
+}
+
+/**
+ * Fetches regions where the state doesn't change.
+ * @param g
+ * @param start     The row number for the start of the range to fetch state blocks for.
+ * @param end       The row number for the end of the range, exclusive.
+ * @returns {Array} Array of records, comprising the end row (exclusive) and the state. The state is valid up to but not including
+ *  the value of start.
+ */
+function findStateBlocks(g, start, end) {
+    "use strict";
+    var result = [];
+    var state = getState(g, start);             // current state
+    var newState;
+    for (var i = start; i < end; i++) {         // find the next change
+        newState = getState(g, i);
+        if (newState !== state) {
+            result.push({row: i, state: state});
+            state = newState;
+        }
+    }
+    result.push({row: end, state: state});
+    return result;
+}
+
+/**
+ * Find the row in the data table that corresponds with the given time value (or closest.)
+ * @param g {Dygraph}           The dygraph containing the data
+ * @param time {number}         The time target to find the corresponding row for
+ * @returns {number} The row containing the time nearest to <code>time</code>}
+ *
+ * Since the time data is assumed sorted, the implementation uses a binary search to efficiently find
+ * the corresponding index.
+ */
+function findDataRow(g, time) {
+    "use strict";
+    var low = 0, high = g.numRows() - 1;
+    var mid, comparison;
+
+    while (low < high) {
+        mid = Math.floor((low + high) / 2);
+        comparison = g.getValue(mid, 0) - time;
+        if (comparison < 0) {
+            low = mid + 1;
+            continue;
+        }
+        if (comparison > 0) {
+            high = mid - 1;
+            continue;
+        }
+        return mid;
+    }
+    return low;
+}
+
+var currentDataSet = null;
+function paintBackground(canvas, area, g) {
+    "use strict";
+    currentDataSet = g;
+    canvas.save();
+    try {
+        paintBackgroundImpl(canvas, area, g);
+    }
+    finally {
+        canvas.restore();
+    }
+
+}
+
+function paintBackgroundImpl(canvas, area, g) {
+    "use strict";
+    // find the time series range corresponding to what is visible
+    var timeRange = [g.toDataXCoord(area.x), g.toDataXCoord(area.x + area.w)];
+    var timeStart = timeRange[0];     // millis since epoch
+    var timeEnd = timeRange[1];
+
+    // the data rows for the range we are interested in. 0-based index. This is deliberately extended out one row
+    // to be sure the range is included
+    var rowStart = Math.max(findDataRow(g, timeStart)-1,0);
+    var rowEnd = findDataRow(g, timeEnd)+1;
+    if (rowStart === null || rowEnd === null){
+        return;
+    }
+    var blocks = findStateBlocks(g, rowStart, rowEnd);    // rowEnd is exclusive
+
+    var startX = 0;                     // start drawing from 0 - the far left
+    for (var i = 0; i < blocks.length; i++) {
+        var block = blocks[i];
+        var row = block.row;              // where this state run ends
+        var t = getTime(g, row);          // convert to time. Using time ensures the display matches the plotted resolution
+                                          // of the graph.
+        var r = (t - timeStart) / (timeEnd - timeStart);   // as a fraction of the entire display
+        var endX = Math.floor(area.x + (area.w * r));
+
+        var state = STATES[parseInt(block.state, 10)];
+        if (state === undefined){
+            state = STATES[0];
+        }
+        //var borderColor = (state.waiting || state.extending) ? setAlphaFactor(state.color, 0.5) : undefined;
+        //var bgColor = (state.waiting) ? bgColor = colorIdle : state.color;
+        canvas.fillStyle = state.color;
+        canvas.fillRect(startX, area.h-STATE_LINE_WIDTH, endX-startX, area.h);
+/*        if (borderColor!==undefined) {
+            lineWidth = 2;
+            canvas.lineWidth = lineWidth;
+            canvas.strokeStyle = borderColor;
+            if (endX-startX>lineWidth)
+                canvas.strokeRect(startX+lineWidth/2, area.y+lineWidth/2, endX-startX-lineWidth, area.h-lineWidth);
+        }
+  */
+        startX = endX;
+    }
+}
+
+var chartColors = [ 'rgb(41,170,41)', 'rgb(240, 100, 100)', 'rgb(89, 184, 255)',  'rgb(255, 161, 76)', '#AAAAAA', 'rgb(153,0,153)' ];
+function formatForChartLegend(v) {
+    "use strict";
+    var val = parseFloat(v);
+    if ( !isNaN(val) ) {
+        return val.toFixed(2) + "\u00B0" + window.tempFormat;
+    }
+    return "--";
+}
+function showChartLegend(e, x, pts, row, g) {
+    /*"use strict";
+    var time = profileTable.formatDate(new Date(x)).display;
+    $('#curr-beer-chart-legend .beer-chart-legend-time').text(time);
+    $('#curr-beer-chart-legend .beer-chart-legend-row.beerTemp .beer-chart-legend-value').text( formatForChartLegend(currentDataSet.getValue(row, 1)) );
+    $('#curr-beer-chart-legend .beer-chart-legend-row.beerSet .beer-chart-legend-value').text( formatForChartLegend(currentDataSet.getValue(row, 2)) );
+    $('#curr-beer-chart-legend .beer-chart-legend-row.fridgeTemp .beer-chart-legend-value').text( formatForChartLegend(currentDataSet.getValue(row, 3)) );
+    $('#curr-beer-chart-legend .beer-chart-legend-row.fridgeSet .beer-chart-legend-value').text( formatForChartLegend(currentDataSet.getValue(row, 4)) );
+    $('#curr-beer-chart-legend .beer-chart-legend-row.roomTemp .beer-chart-legend-value').text( formatForChartLegend(currentDataSet.getValue(row, 5)) );
+    var state = parseInt(currentDataSet.getValue(row, STATE_COLUMN));
+    if ( !isNaN(state) ) {
+        $('#curr-beer-chart-legend .beer-chart-legend-row.state .beer-chart-legend-label').text(STATES[state].text);
+        $('#curr-beer-chart-legend .beer-chart-legend-row.state .state-indicator').css( 'background-color', STATES[state].color );
+    }*/
+}
+function newDygraphTouchstart(event, g, context) { 
+// This right here is what prevents IOS from doing its own zoom/touch behavior 
+// It stops the node from being selected too 
+event.preventDefault(); // touch browsers are all nice. 
+
+if (event.touches.length > 1) { 
+// If the user ever puts two fingers down, it's not a double tap. 
+context.startTimeForDoubleTapMs = null; 
+} 
+
+var touches = []; 
+for (var i = 0; i < event.touches.length; i++) { 
+var t = event.touches[i]; 
+// we dispense with 'dragGetX_' because all touchBrowsers support pageX 
+touches.push({ 
+pageX: t.pageX, 
+pageY: t.pageY, 
+dataX: g.toDataXCoord(t.pageX), 
+dataY: g.toDataYCoord(t.pageY) 
+// identifier: t.identifier 
+}); 
+} 
+context.initialTouches = touches; 
+
+if (touches.length == 1) { 
+// This is just a swipe. 
+context.initialPinchCenter = touches[0]; 
+context.touchDirections = { x: true, y: true }; 
+
+// ADDITION - this needs to select the points 
+/*var closestTouchP = g.findClosestPoint(touches[0].pageX,touches[0].pageY); 
+if(closestTouchP) { 
+var selectionChanged = g.setSelection(closestTouchP.row, closestTouchP.seriesName); 
+} */
+g.mouseMove_(event); 
+
+} else if (touches.length >= 2) { 
+// It's become a pinch! 
+// In case there are 3+ touches, we ignore all but the "first" two. 
+
+// only screen coordinates can be averaged (data coords could be log scale). 
+context.initialPinchCenter = { 
+pageX: 0.5 * (touches[0].pageX + touches[1].pageX), 
+pageY: 0.5 * (touches[0].pageY + touches[1].pageY), 
+
+// TODO(danvk): remove 
+dataX: 0.5 * (touches[0].dataX + touches[1].dataX), 
+dataY: 0.5 * (touches[0].dataY + touches[1].dataY) 
+}; 
+
+// Make pinches in a 45-degree swath around either axis 1-dimensional zooms. 
+var initialAngle = 180 / Math.PI * Math.atan2( 
+context.initialPinchCenter.pageY - touches[0].pageY, 
+touches[0].pageX - context.initialPinchCenter.pageX); 
+
+// use symmetry to get it into the first quadrant. 
+initialAngle = Math.abs(initialAngle); 
+if (initialAngle > 90) initialAngle = 90 - initialAngle; 
+
+context.touchDirections = { 
+x: (initialAngle < (90 - 45/2)), 
+y: (initialAngle > 45/2) 
+}; 
+} 
+
+// save the full x & y ranges. 
+context.initialRange = { 
+x: g.xAxisRange(), 
+y: g.yAxisRange() 
+}; 
+};
+function hideChartLegend() {
+    "use strict";
+    $('#curr-beer-chart-legend .beer-chart-legend-row').each(function() {
+        $(this).find('.beer-chart-legend-value').text('--');
+    });
+    $('#curr-beer-chart-legend .beer-chart-legend-time').text('Date/Time');
+    $('#curr-beer-chart-legend .beer-chart-legend-row.state .beer-chart-legend-label').text('State');
+    $('#curr-beer-chart-legend .beer-chart-legend-row.state .state-indicator').css( 'background-color', '' );
+}
+function findLineByName(name) {
+    "use strict";
+    for (var key in lineNames) {
+        if(lineNames.hasOwnProperty(key)){
+            if ( lineNames[key] === name ){
+                return key;
+            }
+        }
+    }
+    return null;
+}
+var beerChart;
+/* Give name of the beer to display and div to draw the graph in */
+function drawBeerChart(beerToDraw, div){
+    "use strict";
+    var $chartDiv = $("#"+div);
+	$chartDiv.show();
+    $chartDiv.empty();
+    if(beerToDraw === "None"){
+       var $errorMessage = $("<span class='chart-error-text'>" +
+                             "BrewPi is currently not logging data. Start a new brew to resume logging.<br>" +
+                             "You can find your previous beers under Maintenance Panel -> Previous Beers</span>");
+       $chartDiv.addClass("chart-error");
+       $chartDiv.append($errorMessage);
+        return;
+    }
+
+    $.post("http://"+ip+"/get_beer_data.php", {"beername": beerToDraw}, function(answer) {
+        var combinedJson = {};
+		try{
+            combinedJson = $.parseJSON(answer);
+        } catch (e) {
+            var $errorMessage = $("<span class='chart-error-text'>Could not parse data for this brew.<br>" +
+                "If you just started this brew, click the refresh button after a few minutes.<br> " +
+                "A chart will appear after the first data point is logged.</span>");
+            var $refreshButton = $("<button class='chart-error-refresh'>Refresh</button>");
+            $refreshButton.button({icons: {primary: "ui-icon-refresh" }}).click(function(){
+                drawBeerChart(beerToDraw, div);
+            });
+            $chartDiv.addClass("chart-error");
+            $chartDiv.append($errorMessage);
+            $chartDiv.append($refreshButton);
+			
+            return;
+        }
+		$('#loader').hide().find('span').html('');
+        var beerData = toDygraphArray(combinedJson);
+
+        var tempFormat = function(y) {
+            return parseFloat(y).toFixed(2) + "\u00B0 " + window.tempFormat;
+        };
+        window.beerChart = new Dygraph(document.getElementById(div),
+                beerData.values, {
+                labels: beerData.labels,
+                colors: chartColors,
+                axisLabelFontSize:12,
+                animatedZooms: true,
+                gridLineColor:'#ccc',
+				interactionModel:{ 
+					mousedown: Dygraph.defaultInteractionModel.mousedown, 
+					mousemove: Dygraph.defaultInteractionModel.mousemove, 
+					mouseup: Dygraph.defaultInteractionModel.mouseup, 
+					touchstart: newDygraphTouchstart, 
+					touchend: Dygraph.defaultInteractionModel.touchend, 
+					touchmove: Dygraph.defaultInteractionModel.touchmove 
+				},
+                gridLineWidth:'0.1px',
+                labelsDiv: document.getElementById(div+"-label"),
+                displayAnnotations:true,
+                //displayAnnotationsFilter:true,
+                //showRangeSelector: true,
+                strokeWidth: 1,
+                axes: {
+                    y : { valueFormatter: tempFormat }
+                },
+                highlightCircleSize: 2,
+                highlightSeriesOpts: {
+                    strokeWidth: 1.5,
+                    strokeBorderWidth: 1,
+                    highlightCircleSize: 5
+                },
+                highlightCallback: function(e, x, pts, row) {
+                    showChartLegend(e, x, pts, row, beerChart);
+                },
+                unhighlightCallback: function(e) {
+                    hideChartLegend();
+                },
+                underlayCallback: paintBackground,
+                drawCallback: function(beerChart, is_initial) {
+                    if (is_initial) {
+                        if (beerData.annotations.length > 0) {
+                            beerChart.setAnnotations(beerData.annotations);
+                        }
+                    }
+                }
+            }
+        );
+        beerChart.setVisibility(beerChart.indexFromSetName('state')-1, 0);  // turn off state line
+        var $chartContainer = $chartDiv.parent();
+        $chartContainer.find('.beer-chart-controls').show();
+
+        if(div.localeCompare('curr-beer-chart') === 0){
+            currBeerChart = beerChart;
+        }
+        else if(div.localeCompare('prev-beer-chart') === 0){
+            prevBeerChart = beerChart;
+        }
+
+        // hide buttons for lines that are not in the chart
+        for (var key in lineNames){
+            if(lineNames.hasOwnProperty(key)){
+                var $row = $chartContainer.find('.beer-chart-legend-row.' + key);
+                var series = beerChart.getPropertiesForSeries(key);
+                if(series === null){
+                    $row.hide();
+                } else {
+                    var numRows = beerChart.numRows();
+                    if(isDataEmpty(beerChart, series.column, 0, numRows-1)){
+                        $row.hide();
+                    }
+                    else{
+                        $row.show();
+                    }
+                    if ( localStorage.getItem( legendStorageKeyPrefix + key ) === "false" ) {
+                        $row.find('.toggle').addClass("inactive");
+                    }
+                    updateVisibility(key, $row.find('.toggle'));
+                }
+                if($(div + " .toggleAnnotations ").hasClass("inactive")){
+                    $(beerChart).find('.dygraphDefaultAnnotation').css('visibility', 'hidden');
+                }
+            }
+        }
+        var idx = 0;
+        $('#curr-beer-chart-legend .beer-chart-legend-row').each(function() {
+            if ( ! $(this).hasClass("time") && ! $(this).is(":hidden") ) {
+                $(this).addClass( (idx % 2 === 1) ? 'alt' : '' );
+                idx++;
+            }
+        });
+    });
+}
+
+function isDataEmpty(chart, column, rowStart, rowEnd){
+    "use strict";
+    // start with last element, because when a sensor is just connected it should show up
+    for (var row = rowEnd; row > rowStart; row--){
+        if(chart.getValue(row, column) !== null){
+            return false;
+        }
+    }
+    return true;
+}
+
+function toggleLine(el) {
+    "use strict";
+    var $el = $(el);
+    if ( $el.hasClass('beer-chart-legend-label') ) {
+        $el = $el.prev();
+    }
+    $el.toggleClass('inactive');
+    // get line name from classes
+    var classString = $el.attr('class');
+    var classList = classString.split(/\s+/);
+    for (var i in classList){
+        if(classList.hasOwnProperty(i)){
+            if (classList[i] in lineNames){
+                break;
+            }
+        }
+    }
+    updateVisibility(classList[i], $el);
+}
+
+function updateVisibility(lineName, $button){
+    /*"use strict";
+    var $chart = $button.closest('.chart-container').find('.beer-chart');
+    var chartId = $chart.attr('id');
+    var chart;
+    if(chartId.localeCompare('curr-beer-chart')===0){
+        chart = currBeerChart;
+    }
+    else  if(chartId.localeCompare('prev-beer-chart')===0){
+        chart = prevBeerChart;
+    }
+    else{
+        console.log("cannot find chart with id " + chartId);
+        return;
+    }
+    if($button.hasClass("inactive")){
+        chart.setVisibility(chart.getPropertiesForSeries(lineName).column-1, false);
+        localStorage.setItem( legendStorageKeyPrefix + lineName, "false" );
+    } else {
+        chart.setVisibility(chart.getPropertiesForSeries(lineName).column-1, true);
+        localStorage.setItem( legendStorageKeyPrefix + lineName, "true" );
+    }*/
+}
+
+function applyStateColors(){
+    "use strict";
+    $(".state-color.state-cooling").css('background-color',colorCool);
+    $(".state-color.state-heating").css('background-color',colorHeat);
+    $(".state-color.state-waiting-to-cool").css('background-color',colorWaitingCool);
+    $(".state-color.state-waiting-to-heat").css('background-color',colorWaitingHeat);
+    $(".state-color.state-heating-min-time").css('background-color', colorHeatingMinTime);
+    $(".state-color.state-cooling-min-time").css('background-color', colorCoolingMinTime);
+    $(".state-color.state-waiting-peak").css('background-color', colorWaitingPeakDetect);
+    $(".state-color.state-idle").css('background-color', colorIdle);
+}
+
+function toggleAnnotations(el){
+    "use strict";
+    var $el = $(el);
+    if ( $el.hasClass('beer-chart-legend-label') ) {
+        $el = $el.prev();
+    }
+    $el.toggleClass('inactive');
+    var $chart = $el.closest('.chart-container').find('.beer-chart');
+    var chartId = $chart.attr('id');
+
+    if($($el).hasClass('inactive')){
+        $chart.find('.dygraphDefaultAnnotation').css('visibility', 'hidden');
+    }
+    else{
+        $chart.find('.dygraphDefaultAnnotation').css('visibility', 'visible');
+    }
+}
+
+
+
+
+
+
+	var ip = "";
+	if (localStorage.getItem("brewpi_ip") === null) {
+		ip = "";
+	} else {
+		ip = localStorage.getItem("brewpi_ip");
+		$('#ip').val(ip);
+	}
+	
+	/*function loading(msg = '',callback = function() {}, timeout = 5) {
+		var d = new Date();
+		var id = d.getTime();
+		$('#loader').data("id",id).show().find('span').html(msg);
+		setTimeout(function() {
+			$('#loader').hide().find('span').html('');
+			
+			console.log(arguments);
+		},timeout * 1000,id);
+	}*/
+	
+	var beerName = false;
+	$('#connect button').click(function(e) {
+		e.preventDefault();
+		$('#notice').text('');
+		if($(this).hasClass('connected') || $(this).hasClass('connecting')) {
+			$('#lcd').hide();
+			$('#connect button').html('Connect').removeClass('connected').removeClass('connecting');
+			clearInterval(timer);
+			clearTimeout(connectTimeout);
+		} else {
+			ip = $('#ip').val();
+			localStorage.setItem("brewpi_ip", ip);
+			$('#ip').attr('disabled','disabled');
+			$('#connect button').html('Connecting').addClass('connecting');
+			updateLCD();
+			timer = setInterval(updateLCD,10000);
+			connectTimeout = setTimeout(function() {
+				if($('#connect button').hasClass('connecting')) {
+					$('#lcd').hide();
+					$('#connect button').html('Connect').removeClass('connected').removeClass('connecting');
+					clearInterval(timer);
+					clearTimeout(connectTimeout);
+					$('#notice').text('Unable to connect. Please try again.');
+				}
+			},5000);
+			/*
+			$('#loader').show().find('span').html('Connecting to '+ip+'&hellip;');
+			$.getJSON("http://"+ip+"/userSettings.json",function(json,status) {
+				if(status == 'success' && 'beerName' in json) {
+					//Got a beer name
+					beerName = decodeURIComponent(json.beerName);
+					console.log(json.beerName);
+					$('#loader').show().find('span').html('Getting Beer Data<br/><strong>'+beerName+'</strong>');
+					drawBeerChart(json.beerName, "chart");
+					var d = new Date();
+					var t = d.getTime();
+					beerChart.updateOptions({
+					  dateWindow: [t-86400, t]
+					});
+				} else {
+					//no beername returned - fail
+					alert("Failure connecting to BrewPi");
+				}
+			});
+			*/
+		}
+	});
+
+</script>
 </body>
 
 </html>
