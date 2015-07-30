@@ -9,7 +9,7 @@
 		/* LCD display styling */
 		@font-face {
 			font-family: '5x8LCDHD44780UA02Regular';
-			src: url('https://github.com/BrewPi/brewpi-www/raw/master/font/5x8_lcd_hd44780u_a02-webfont.eot');
+			src: url('font/5x8_lcd_hd44780u_a02-webfont.eot');
 			font-weight: normal;
 			font-style: normal;
 		}
@@ -19,6 +19,21 @@
 		header {
 			text-align:center;
 		}	
+		textarea:focus, input:focus{
+			outline: none;
+			background:#eee;
+		}
+		button:focus {
+			outline: none;
+		}
+		input:disabled {
+			-webkit-touch-callout: none;
+			-webkit-user-select: none;
+			-khtml-user-select: none;
+			-moz-user-select: none;
+			-ms-user-select: none;
+			user-select: none;
+		}
 		#connect
 		{
 			background-color: #555;
